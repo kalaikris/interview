@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'samplenginx'
+    }
+
+    stages {
+        stage('clean-process') {
+            steps {
+                script {
+                    sh 'rm -rf java_testing'
+                }
+            }
+        }
+
+        stage('codepull') {
+            steps {
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/kalaikris/interview.git'
+            }
+        }
+
+        stage('docker-image-build') {
+            steps {
+                sh '''
+                    whoami
+                    docker build -t ${DOCKER_IMAGE}:latest .
+                '''
+            }
+        }
+
+        stage('docker-login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_USERNAME1', usernameVariable: 'docker_user', passwordVariable: 'docker_passwd')]) {
+                    script {
+                        sh 'docker login -u ${docker_user} -p ${docker_passwd}'
+                        sh 'docker push ${DOCKER_IMAGE}:latest'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                sh 'terraform validate'
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                sh 'terraform plan -out=tfplan'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve tfplan'
+            }
+        }
+    }
+}
