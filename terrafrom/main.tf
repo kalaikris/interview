@@ -5,6 +5,15 @@ terraform {
       version = ">= 3.50.0"
     }
   }
+
+  # S3 Backend Configuration for Statefile
+  backend "s3" {
+    bucket         = "kalaisamplebuckettesting" 
+    key            = "./terraform/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true  
+    
+  }
 }
 
 provider "aws" {
@@ -34,4 +43,3 @@ module "ec2" {
   user_data          = file("docker.sh")
   target_group_arns  = [module.alb.target_group_arn]
 }
-
