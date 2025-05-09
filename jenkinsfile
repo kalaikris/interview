@@ -9,7 +9,7 @@ pipeline {
         stage('clean-process') {
             steps {
                 script {
-                    sh 'rm -rf java_testing'
+                    sh 'rm -rf sample'
                 }
             }
         }
@@ -42,24 +42,28 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
+                sh 'cd /var/lib/jenkins/workspace/sample/terraform/'
                 sh 'terraform init'
             }
         }
 
         stage('Terraform Validate') {
             steps {
+                sh 'cd /var/lib/jenkins/workspace/sample/terraform/'
                 sh 'terraform validate'
             }
         }
 
         stage('Terraform Plan') {
             steps {
+                sh 'cd /var/lib/jenkins/workspace/sample/terraform/'
                 sh 'terraform plan -out=tfplan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
+                sh 'cd /var/lib/jenkins/workspace/sample/terraform/'
                 sh 'terraform apply -auto-approve tfplan'
             }
         }
